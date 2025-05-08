@@ -1,3 +1,5 @@
+-- Table setup
+
 CREATE TABLE user (
 	id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	username VARCHAR(50) NOT NULL UNIQUE,
@@ -23,3 +25,9 @@ CREATE TABLE user_role (
 	FOREIGN KEY (role_id) REFERENCES role(id)
 		ON DELETE CASCADE
 );
+
+-- Role setup
+
+INSERT INTO role (name) VALUES
+('admin'),
+('user');
