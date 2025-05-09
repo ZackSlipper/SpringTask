@@ -16,6 +16,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.kitm.movies.dto.MovieCreateDTO;
 import com.kitm.movies.dto.MovieResponseDTO;
+import com.kitm.movies.dto.search.MovieCategoryIdDTO;
+import com.kitm.movies.dto.search.MovieCategoryNameDTO;
+import com.kitm.movies.dto.search.MovieTitleDTO;
 import com.kitm.movies.entity.Movie;
 import com.kitm.movies.mapper.MovieMapper;
 import com.kitm.movies.service.MovieService;
@@ -68,6 +71,36 @@ public class MovieController {
 		Optional<Movie> results = Optional.ofNullable(movieService.findById(id));
 		return results.map(movie -> ResponseEntity.ok(MovieMapper.toResponse(movie)))
 				.orElse(ResponseEntity.notFound().build());
+	}
+
+	@PostMapping("/search/title")
+	@PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
+	public ResponseEntity<Map<String, Object>> findByTitle(@Valid @RequestBody MovieTitleDTO movieTitleDTO) {
+		List<Movie> results = movieService.findByTitle(movieTitleDTO.getTitle());
+		if (results.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(Map.of("movies", results));
+	}
+
+	@PostMapping("/search/categoryName")
+	@PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
+	public ResponseEntity<Map<String, Object>> findByCategoryName(@Valid @RequestBody MovieCategoryNameDTO movieCategoryNameDTO) {
+		List<Movie> results = movieService.findAllByCategoryName(movieCategoryNameDTO.getName());
+		if (results.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(Map.of("movies", results));
+	}
+
+	@PostMapping("/search/categoryId")
+	@PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
+	public ResponseEntity<Map<String, Object>> findByCategoryId(@Valid @RequestBody MovieCategoryIdDTO movieCategoryIdDTO) {
+		List<Movie> results = movieService.findAllByCategoryId(movieCategoryIdDTO.getId());
+		if (results.isEmpty()) {
+			return ResponseEntity.notFound().build();
+		}
+		return ResponseEntity.ok(Map.of("movies", results));
 	}
 
 	@PostMapping

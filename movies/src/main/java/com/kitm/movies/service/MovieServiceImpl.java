@@ -6,16 +6,20 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.kitm.movies.dao.CategoryRepository;
 import com.kitm.movies.dao.MovieRepository;
+import com.kitm.movies.entity.Category;
 import com.kitm.movies.entity.Movie;
 
 @Service
 public class MovieServiceImpl implements MovieService {
 
 	private MovieRepository movieRepository;
+	private CategoryRepository categoryRepository;
 
 	@Autowired
-	public MovieServiceImpl(MovieRepository movieRepository) {
+	public MovieServiceImpl(MovieRepository movieRepository, CategoryRepository categoryRepository) {
+		this.categoryRepository = categoryRepository;
 		this.movieRepository = movieRepository;
 	}
 
@@ -44,5 +48,26 @@ public class MovieServiceImpl implements MovieService {
 	@Override
 	public void deleteById(Long id) {
 		movieRepository.deleteById(id);
+	}
+
+	@Override
+	public List<Movie> findAllByCategoryId(Long categoryId) {
+		return movieRepository.findAllByCategoryId(categoryId);
+	}
+
+	@Override
+	public List<Movie> findAllByCategoryName(String categoryName) {
+		Optional<Category> category = categoryRepository.findByName(categoryName);
+		if (category.isEmpty()) {
+			throw new RuntimeException("Did not find category name - " + categoryName);
+		}
+
+		Category categoryEntity = category.get();
+		return movieRepository.findAllByCategoryId(categoryEntity.getId());
+	}
+
+	@Override
+	public List<Movie> findByTitle(String title) {
+		return movieRepository.findByTitle(title);
 	}
 }

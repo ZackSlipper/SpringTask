@@ -7,6 +7,12 @@ import com.kitm.movies.entity.Movie;
 public interface MovieService {
 	List<Movie> findAll();
 
+	List<Movie> findAllByCategoryId(Long categoryId);
+
+	List<Movie> findAllByCategoryName(String categoryName);
+
+	List<Movie> findByTitle(String title);
+
 	Movie findById(Long id);
 
 	Movie save(Movie movie);
