@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +18,7 @@ import com.kitm.movies.dto.CommentCreateDTO;
 import com.kitm.movies.dto.CommentResponseDTO;
 import com.kitm.movies.dto.search.CommentIdDTO;
 import com.kitm.movies.entity.Comment;
+import com.kitm.movies.helpers.UserHelper;
 import com.kitm.movies.mapper.CommentMapper;
 import com.kitm.movies.service.CommentService;
 
@@ -77,6 +79,18 @@ public class CommentController {
 	@PostMapping
 	@PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
 	public ResponseEntity<CommentResponseDTO> addComment(@Valid @RequestBody CommentCreateDTO commentDTO) {
+		
+		Long userId = UserHelper.getCurrentUserId();
+
+		if (commentDTO.getUserId() == null) {
+			commentDTO.setUserId(userId);
+		}
+
+		//Prevents the user from creating a comment with a different userId than their own
+		if (userId == null || userId != commentDTO.getUserId()) {
+			return ResponseEntity.badRequest().body(null);
+		}
+
 		Comment saved = commentService.save(CommentMapper.toEntity(commentDTO));
 		return ResponseEntity.ok(CommentMapper.toResponse(saved));
 	}
@@ -87,6 +101,10 @@ public class CommentController {
 		Comment comment = commentService.findById(id);
 		if (comment == null) {
 			return ResponseEntity.notFound().build();
+		}
+		
+		if (!UserHelper.isUserAdmin() && !comment.getUserId().equals(UserHelper.getCurrentUserId())) {
+			return ResponseEntity.status(403).body("You are not authorized to delete this comment");
 		}
 
 		commentService.deleteById(id);
@@ -99,6 +117,10 @@ public class CommentController {
 		Comment existingComment = commentService.findById(id);
 				if (existingComment == null) {
 			return ResponseEntity.notFound().build();
+		}
+
+		if (!UserHelper.isUserAdmin() && !existingComment.getUserId().equals(UserHelper.getCurrentUserId())) {
+			return ResponseEntity.status(403).body(null);
 		}
 
 		Comment updatedComment = CommentMapper.toEntity(commentDTO);
@@ -121,6 +143,10 @@ public class CommentController {
 
 		if (pathPayload == null || pathPayload.isEmpty() || pathPayload.containsKey("id")) {
 			return ResponseEntity.badRequest().body(null);
+		}
+
+		if (!UserHelper.isUserAdmin() && !existingComment.getUserId().equals(UserHelper.getCurrentUserId())) {
+			return ResponseEntity.status(403).body(null);
 		}
 
 		ObjectNode commentNode = objectMapper.convertValue(existingComment, ObjectNode.class);

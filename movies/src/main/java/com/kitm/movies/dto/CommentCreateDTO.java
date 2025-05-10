@@ -11,7 +11,6 @@ public class CommentCreateDTO {
 	@Positive(message = "Movie ID must be positive")
 	private Long movieId;
 
-	@NotNull(message = "User ID is mandatory")
 	@Positive(message = "User ID must be positive")
 	private Long userId;
 
