@@ -61,7 +61,8 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth ->
                 auth.requestMatchers("/api/v1/auth/**").permitAll()
 					.requestMatchers("/api/v1/movie/**").permitAll()
-					.requestMatchers("/api/category/**").permitAll()
+					.requestMatchers("/api/v1/categories/**").permitAll()
+					.requestMatchers("/api/v1/comments/**").permitAll()
                     .anyRequest().permitAll()
                 );
 
